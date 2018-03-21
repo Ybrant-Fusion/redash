@@ -94,6 +94,9 @@ class Parameter {
         this.value = moment(value).format('YYYY-MM-DD HH:mm');
         this.$$value = moment(this.value).toDate();
       }
+      this.value = this.$$value = value;
+    } else {
+      this.value = this.$$value = value;
     }
   }
 }

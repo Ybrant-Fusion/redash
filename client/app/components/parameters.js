@@ -152,22 +152,29 @@ function ParametersDirective($location, $uibModal) {
       };
       // is this the correct location for this logic?
       if (scope.syncValues !== false) {
+        scope.enumValue = Array(scope.parameters.length);
         scope.$watch('parameters', () => {
           if (scope.changed) {
             scope.changed({});
           }
-          scope.parameters.forEach((param) => {
+          scope.parameters.forEach((param, index) => {
             if (param.value !== null || param.value !== '') {
               $location.search(`p_${param.name}`, param.value);
+              if (param.type === 'enum' && (param.title.endsWith('$To') || param.title.endsWith('$From'))) {
+                scope.enumValue[index] = moment(param.value).format('YYYY-MM-DD');
+              } else {
+                scope.enumValue[index] = param.value;
+              }
             }
           });
         }, true);
-        scope.enumValue = Array(scope.parameters.length);
         scope.$watch('enumValue', (n, o) => {
           if (scope.changed) {
             const changedIndex = getChangeIndex(n, o);
             if (n[changedIndex]) {
-              if (n[changedIndex] === '$Custom_date') {
+              if (!scope.parameters[changedIndex].name.endsWith('$To') && !scope.parameters[changedIndex].name.endsWith('$From')) {
+                scope.parameters[changedIndex].ngModel = n[changedIndex];
+              } else if (n[changedIndex] === '$Custom_date') {
                 scope.parameters[changedIndex].ngModel = moment().format('YYYY-MM-DD');
               } else if (n[changedIndex] === moment().add(-1, 'days').format('YYYY-MM-DD') && scope.parameters[changedIndex].name.endsWith('$From')) {
                 scope.parameters[changedIndex].ngModel = moment(n[changedIndex]).format('YYYY-MM-DD');
@@ -201,10 +208,9 @@ function ParametersDirective($location, $uibModal) {
           }
           return option;
         }
-        return [];
       };
       scope.mapOptionValues = (option) => {
-        const humanTimeEnum = ['today', 'yesterday', 'last week'];
+        const humanTimeEnum = ['today', 'yesterday', 'last week', 'custom date'];
         if (option.startsWith('$')) {
           if (humanTimeEnum.indexOf(scope.mapOptions(option).toLowerCase()) > -1) {
             let date;
@@ -225,15 +231,14 @@ function ParametersDirective($location, $uibModal) {
                 break;
               }
               default: {
-                return '';
+                date = moment().format('YYYY-MM-DD');
               }
             }
             return date;
           }
         } else {
-          return moment(option).format('YYYY-MM-DD');
+          return option;
         }
-        return option;
       };
       scope.hideEnumToDate = (index) => {
         if (scope.parameters[index].type === 'enum' && scope.parameters[index].name.endsWith('$To') &&
