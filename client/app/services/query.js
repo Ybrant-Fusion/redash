@@ -157,7 +157,7 @@ class Parameters {
             break;
           }
           default: {
-            p.value = moment(p.value).format('YYYY-MM-DD HH:mm');
+            p.value = moment(p.value).startOf('day').format('YYYY-MM-DD HH:mm');
           }
         }
       }
