@@ -68,13 +68,8 @@ class Parameter {
       this.$$value = this.$$value || parseInt(this.value, 10);
       return this.$$value;
     } else if (this.type === 'enum') {
-      const options = this.enumOptions.split('\n');
-      if (options.every(option => option.startsWith('$'))) {
-        this.$$value = this.$$value || moment(this.value).toDate();
-        return this.$$value;
-      }
+      return this.$$value;
     }
-
     return this.value;
   }
 
@@ -88,13 +83,6 @@ class Parameter {
     } else if (value && this.type === 'datetime-with-seconds') {
       this.value = moment(value).format('YYYY-MM-DD HH:mm:ss');
       this.$$value = moment(this.value).toDate();
-    } else if (value && this.type === 'enum') {
-      const options = this.enumOptions.split('\n');
-      if (options.every(option => option.startsWith('$'))) {
-        this.value = moment(value).format('YYYY-MM-DD HH:mm');
-        this.$$value = moment(this.value).toDate();
-      }
-      this.value = this.$$value = value;
     } else {
       this.value = this.$$value = value;
     }
@@ -149,8 +137,36 @@ class Parameters {
     });
 
     const parameterExists = p => contains(parameterNames, p.name);
+    const substituteHumanTime = (p) => {
+      if (p.type === 'enum' && p.enumOptions.split('\n').every(opt => opt.startsWith('$'))) {
+        switch (p.value.toLowerCase()) {
+          case '$tomorrow': {
+            p.value = moment().startOf('day').add(1, 'days').format('YYYY-MM-DD HH:mm');
+            break;
+          }
+          case '$today': {
+            p.value = moment().startOf('day').format('YYYY-MM-DD HH:mm');
+            break;
+          }
+          case '$yesterday': {
+            p.value = moment().startOf('day').add(-1, 'days').format('YYYY-MM-DD HH:mm');
+            break;
+          }
+          case '$last week': {
+            p.value = moment().startOf('day').add(-6, 'days').format('YYYY-MM-DD HH:mm');
+            break;
+          }
+          default: {
+            p.value = moment(p.value).format('YYYY-MM-DD HH:mm');
+          }
+        }
+      }
+      return p;
+    };
+
     this.query.options.parameters = this.query.options.parameters
       .filter(parameterExists)
+      .filter(substituteHumanTime)
       .map(p => new Parameter(p));
   }
 

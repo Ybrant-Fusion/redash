@@ -18,7 +18,7 @@
       <span ng-switch-when="enum">
         <input ng-hide="enumValue[$index] !== '$Custom_date'" type="date" class="form-control" ng-model="param.ngModel">
         <select ng-hide="enumValue[$index] === '$Custom_date'" ng-model="enumValue[$index]" class="form-control">
-          <option ng-repeat="option in extractEnumOptions(param.enumOptions)" value="{{mapOptionValues(option)}}">{{mapOptions(option)}}</option>
+          <option ng-repeat="option in extractEnumOptions(param.enumOptions)" value="{{option}}">{{mapOptions(option)}}</option>
         </select>
         <span ng-hide="enumValue[$index] !== '$Custom_date'" ng-click="clearParam(param, $index)">&#10006;</span>
       </span>
