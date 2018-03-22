@@ -138,7 +138,7 @@ class Parameters {
 
     const parameterExists = p => contains(parameterNames, p.name);
     const substituteHumanTime = (p) => {
-      if (p.type === 'enum' && p.enumOptions.split('\n').every(opt => opt.startsWith('$'))) {
+      if (p.type === 'enum' && p.value && p.enumOptions.split('\n').every(opt => opt.startsWith('$'))) {
         switch (p.value.toLowerCase()) {
           case '$tomorrow': {
             p.value = moment().startOf('day').add(1, 'days').format('YYYY-MM-DD HH:mm');
