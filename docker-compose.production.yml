@@ -38,8 +38,8 @@ services:
     restart: always
   postgres:
     image: postgres:9.5.6-alpine
-    # volumes:
-    #   - /opt/postgres-data:/var/lib/postgresql/data
+    volumes:
+      - /opt/postgres-data:/var/lib/postgresql/data
     restart: always
   nginx:
     image: redash/nginx:latest
