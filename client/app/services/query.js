@@ -137,36 +137,9 @@ class Parameters {
     });
 
     const parameterExists = p => contains(parameterNames, p.name);
-    const substituteHumanTime = (p) => {
-      if (p.type === 'enum' && p.value && p.enumOptions.split('\n').every(opt => opt.startsWith('$'))) {
-        switch (p.value.toLowerCase()) {
-          case '$tomorrow': {
-            p.value = moment().startOf('day').add(1, 'days').format('YYYY-MM-DD HH:mm');
-            break;
-          }
-          case '$today': {
-            p.value = moment().startOf('day').format('YYYY-MM-DD HH:mm');
-            break;
-          }
-          case '$yesterday': {
-            p.value = moment().startOf('day').add(-1, 'days').format('YYYY-MM-DD HH:mm');
-            break;
-          }
-          case '$last week': {
-            p.value = moment().startOf('day').add(-6, 'days').format('YYYY-MM-DD HH:mm');
-            break;
-          }
-          default: {
-            p.value = moment(p.value).startOf('day').format('YYYY-MM-DD HH:mm');
-          }
-        }
-      }
-      return p;
-    };
 
     this.query.options.parameters = this.query.options.parameters
       .filter(parameterExists)
-      .filter(substituteHumanTime)
       .map(p => new Parameter(p));
   }
 
@@ -260,6 +233,33 @@ function QueryResource($resource, $http, $q, $location, currentUser, QueryResult
     }
   };
 
+  const substituteHumanTime = (p) => {
+    if (p && p.startsWith('$')) {
+      switch (p.toLowerCase()) {
+        case '$tomorrow': {
+          p = moment().startOf('day').add(1, 'days').format('YYYY-MM-DD HH:mm');
+          break;
+        }
+        case '$today': {
+          p = moment().startOf('day').format('YYYY-MM-DD HH:mm');
+          break;
+        }
+        case '$yesterday': {
+          p = moment().startOf('day').add(-1, 'days').format('YYYY-MM-DD HH:mm');
+          break;
+        }
+        case '$last_week': {
+          p = moment().startOf('day').add(-6, 'days').format('YYYY-MM-DD HH:mm');
+          break;
+        }
+        default: {
+          p = moment(p).startOf('day').format('YYYY-MM-DD HH:mm');
+        }
+      }
+    }
+    return p;
+  };
+
   Query.prototype.getSourceLink = function getSourceLink() {
     return `/queries/${this.id}/source`;
   };
@@ -297,6 +297,10 @@ function QueryResource($resource, $http, $q, $location, currentUser, QueryResult
     let queryText = this.query;
 
     const parameters = this.getParameters();
+    const paramVal = parameters.getValues();
+    Object.keys(paramVal).forEach((key) => {
+      paramVal[key] = substituteHumanTime(paramVal[key]);
+    });
     const missingParams = parameters.getMissing();
 
     if (missingParams.length > 0) {
@@ -316,7 +320,7 @@ function QueryResource($resource, $http, $q, $location, currentUser, QueryResult
     }
 
     if (parameters.isRequired()) {
-      queryText = Mustache.render(queryText, parameters.getValues());
+      queryText = Mustache.render(queryText, paramVal);
 
       // Need to clear latest results, to make sure we don't use results for different params.
       this.latest_query_data = null;
