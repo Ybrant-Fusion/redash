@@ -184,7 +184,7 @@ function ParametersDirective($location, $uibModal) {
                 scope.parameters[changedIndex].value = n[changedIndex];
               } else if (n[changedIndex] === '$Custom_date') {
                 scope.parameters[changedIndex].value = moment().startOf('day').format('YYYY-MM-DD HH:mm');
-                scope.parameters[scope.getPairedToInputIndex(scope.parameters[changedIndex])].value = '$Tomorrow';
+                scope.parameters[scope.getPairedToInputIndex(scope.parameters[changedIndex])].value = moment().startOf('day').format('YYYY-MM-DD HH:mm');
               } else if (n[changedIndex] === '$Yesterday' && scope.parameters[changedIndex].name.endsWith('$From')) {
                 scope.parameters[changedIndex].value = '$Yesterday';
                 scope.parameters[scope.getPairedToInputIndex(scope.parameters[changedIndex])].value = '$Today';
@@ -226,6 +226,7 @@ function ParametersDirective($location, $uibModal) {
         }
         return false;
       };
+      scope.hideToInput = name => name.endsWith('$To');
       scope.showParameterSettings = (param) => {
         $uibModal.open({
           component: 'parameterSettings',
@@ -238,7 +239,7 @@ function ParametersDirective($location, $uibModal) {
         if (param.name.endsWith('$To')) {
           scope.enumValue[index] = '$Today';
         } else {
-          scope.enumValue[index] = '$Today';
+          scope.enumValue[index] = '$Yesterday';
           const pairedIndex = scope.getPairedToInputIndex(param);
           scope.enumValue[pairedIndex] = '$Today';
         }
