@@ -7,7 +7,7 @@
 version: '2'
 services:
   server:
-    image: redash/redash:latest
+    image: redash-brightcom-latest:latest
     command: server
     depends_on:
       - postgres
@@ -30,7 +30,7 @@ services:
       REDASH_HOST: ${HOST}
     restart: always
   worker:
-    image: redash/redash:latest
+    image: redash-brightcom-latest:latest
     command: scheduler
     environment:
       PYTHONUNBUFFERED: 0
