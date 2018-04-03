@@ -164,8 +164,13 @@ function ParametersDirective($location, $uibModal) {
                 if (param.title.endsWith('$To') || param.title.endsWith('$From')) {
                   if (typeof param.value === 'object' || !param.value.startsWith('$')) {
                     scope.enumValue[index] = '$Custom_date';
-                    param.ngModel = param.ngModel || moment(param.value).startOf('day').toDate();
-                    param.value = moment(param.value).startOf('day').format('YYYY-MM-DD HH:mm');
+                    if (param.title.endsWith('$To')) {
+                      param.ngModel = param.ngModel || moment(param.value).endOf('day').toDate();
+                      param.value = moment(param.value).endOf('day').format('YYYY-MM-DD HH:mm');
+                    } else {
+                      param.ngModel = param.ngModel || moment(param.value).startOf('day').toDate();
+                      param.value = moment(param.value).startOf('day').format('YYYY-MM-DD HH:mm');
+                    }
                   } else {
                     scope.enumValue[index] = param.value;
                   }
@@ -184,7 +189,7 @@ function ParametersDirective($location, $uibModal) {
                 scope.parameters[changedIndex].value = n[changedIndex];
               } else if (n[changedIndex] === '$Custom_date') {
                 scope.parameters[changedIndex].value = moment().startOf('day').format('YYYY-MM-DD HH:mm');
-                scope.parameters[scope.getPairedToInputIndex(scope.parameters[changedIndex])].value = moment().startOf('day').format('YYYY-MM-DD HH:mm');
+                scope.parameters[scope.getPairedToInputIndex(scope.parameters[changedIndex])].value = moment().endOf('day').format('YYYY-MM-DD HH:mm');
               } else if (n[changedIndex] === '$Yesterday' && scope.parameters[changedIndex].name.endsWith('$From')) {
                 scope.parameters[changedIndex].value = '$Yesterday';
                 scope.parameters[scope.getPairedToInputIndex(scope.parameters[changedIndex])].value = '$Today';

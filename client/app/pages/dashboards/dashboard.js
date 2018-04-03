@@ -1,4 +1,6 @@
 import * as _ from 'underscore';
+import moment from 'moment';
+
 import PromiseRejectionError from '@/lib/promise-rejection-error';
 import { durationHumanize } from '@/filters';
 import template from './dashboard.html';
@@ -140,7 +142,12 @@ function DashboardCtrl(
           });
       }
     });
-    this.globalParameters = _.values(globalParams);
+    this.globalParameters = _.values(globalParams).map((param) => {
+      if ((param.title.endsWith('$From') || param.title.endsWith('$To')) && !param.value.startsWith('$')) {
+        param.$$value = moment(param.value, 'YYYY-MM-DD HH:mm').toDate();
+      }
+      return param;
+    });
   };
 
   this.onGlobalParametersChange = () => {
